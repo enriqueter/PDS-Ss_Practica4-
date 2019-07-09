@@ -23,6 +23,14 @@
 #define AMP_MAX 10
 #define AMP_MIN 0
 #define AMP_STEP 0.10f
+
+#define SCALE_1 0.7f
+#define SCALE_2 0.49f	// SCALE_1^2
+#define SCALE_3 0.343f	// SCALE_1^3
+
+#define OFFSET 	2110
+#define R  		2000
+
 /********* DEFINITIONS *****************/
 
 uint32_t mcg_clk = 0;
@@ -44,20 +52,17 @@ int main(void)
 
 
 	/* Array for the ADC input and max R value  */
-	int16_t in_ADC[6000] = {};
+	float in_ADC[25000] = {};
 
 	/* formula */
 
-	//uint16_t out_DAC[7];
-
 	uint8_t cntr1 = NULL;
 
-	uint8_t x = 0;
-	uint8_t a = 0;
-	uint8_t b = 0;
-	uint8_t c = 0;
-	int16_t out_ECHO = 0;
-	uint16_t R = 2000;
+	uint8_t n = 0;
+
+	float out_ECHO = 0;
+
+
 	uint8_t BTN_selector = FALSE;
 
 
@@ -66,14 +71,24 @@ int main(void)
 
     while(1)
     {
+		in_ADC[n] = ADC_result(); // SI SE NECESITA UTILIZAR FTM COMO TRIGGER PARA EL ADC Y TENER MEJOR CONTROL
+
+		/*  calculo de   salida*/
+		out_ECHO = (in_ADC[n]) + (SCALE_1 * in_ADC[n - R]) + (SCALE_2 * in_ADC[n - 2*R]) + (SCALE_3 * in_ADC[n - 3*R]);
+
+		DAC_output(out_ECHO + OFFSET);
+
+		if(n == SAMPLES)
+		{
+			n = ZERO;
+		}
+		else
+		{
+			n++;
+		}
 
 
+    }
 
-
-
-			in_ADC[x]= ADC_result();
-
-			/*  calculo de   salida*/
-			out_ECHO = in_ADC[x] + a*in_ADC[x-R] +b*in_ADC[x-2R] + c*in_ADC[x-3R];
-
-			DAC_output(out_ECHO - 2110);
+    return (0);
+}
