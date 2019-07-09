@@ -24,13 +24,11 @@
 #define AMP_MIN 0
 #define AMP_STEP 0.10f
 
-#define SCALE_1 0.7f
-#define SCALE_2 0.49f	// SCALE_1^2
-#define SCALE_3 0.343f	// SCALE_1^3
+
 
 #define SAMPLES 25000
 #define OFFSET 	2110
-#define R  		2000
+
 
 /********* DEFINITIONS *****************/
 
@@ -65,14 +63,51 @@ int main(void)
 
 
 	uint8_t BTN_selector = FALSE;
+	uint8_t BTN_Delayctr = FALSE;
+	uint8_t BTN_Factorctr = FALSE;
 
-
-
-
+	uint16_t R = 2000;
+	float SCALE_1  = 0.7;
+	float SCALE_2  = 0.49;	// SCALE_1^2
+	float SCALE_3  = 0.343;	// SCALE_1^3
 
     while(1)
     {
-		in_ADC[n] = ADC_result(); // SI SE NECESITA UTILIZAR FTM COMO TRIGGER PARA EL ADC Y TENER MEJOR CONTROL
+    	BTN_selector = Buttons_get();
+    	if(GPIO_get_interrupt_status(GPIO_C))
+    	{
+    		if(BTN_selector = BTN_0){    /* Button 0 to modify delay*/
+
+    			BTN_Delayctr++;
+    		    if(BTN_Delayctr < 8 )
+    		    {
+    		    		R = R +1000;
+    		    }else if(BTN_Delayctr > 8 )
+    		    {
+    		    	BTN_Delayctr = NULL;
+    		    }
+    		}
+    		else if(BTN_selector = BTN_1)  /* Button 1 to modify factor */
+    		{
+    			BTN_Factorctr++;      /* Factor > 1 para que se disminuya */
+    			if(BTN_Factorctr < 5)
+    			{
+    				SCALE_1 = SCALE_1 * (BTN_Factorctr * 0.2);
+    				SCALE_2 = SCALE_2 * (BTN_Factorctr * 0.2);
+    				SCALE_3 = SCALE_3 * (BTN_Factorctr * 0.2);
+    			}else if(BTN_Factorctr > 5)
+    			{
+    				BTN_Factorctr = NULL;
+    			}
+    		}
+    		else
+    		{
+    			/* Do nothing*/
+    		}
+
+
+    	}
+    	in_ADC[n] = ADC_result(); // SI SE NECESITA UTILIZAR FTM COMO TRIGGER PARA EL ADC Y TENER MEJOR CONTROL
 
 		/*  calculo de   salida*/
 		out_ECHO = (in_ADC[n]) + (SCALE_1 * in_ADC[n - R]) + (SCALE_2 * in_ADC[n - 2*R]) + (SCALE_3 * in_ADC[n - 3*R]);
@@ -87,6 +122,7 @@ int main(void)
 		{
 			n++;
 		}
+
 
 
     }
