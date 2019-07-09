@@ -28,6 +28,7 @@
 #define SCALE_2 0.49f	// SCALE_1^2
 #define SCALE_3 0.343f	// SCALE_1^3
 
+#define SAMPLES 25000
 #define OFFSET 	2110
 #define R  		2000
 
